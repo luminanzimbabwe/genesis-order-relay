@@ -1,0 +1,25 @@
+{
+  "name": "Genesis Order Relay",
+  "short_name": "Order Relay",
+  "description": "Find stores near you, browse products, and place orders",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8faff",
+  "theme_color": "#667eea",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/genesislogo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/genesislogo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

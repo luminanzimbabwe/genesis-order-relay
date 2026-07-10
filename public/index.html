@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Relay — Find Stores & Place Orders | Genesis Zimbabwe</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="/genesislogo.png">
+  <link rel="apple-touch-icon" href="/genesislogo.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #f8faff; color: #1a1a2e; }
+    .or-header { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; padding: 24px 16px; text-align: center; position: relative; }
+    .or-header h1 { font-size: 28px; font-weight: 800; }
+    .or-header p { opacity: 0.85; font-size: 14px; margin-top: 4px; }
+    .or-container { max-width: 1200px; margin: 0 auto; padding: 20px 16px 40px; }
+    .or-search-section { margin-bottom: 24px; }
+    .or-search-box { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .or-search-box input { flex: 1; min-width: 200px; padding: 14px 18px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; font-family: inherit; background: #fff; }
+    .or-search-box input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.15); }
+    .or-search-box select { padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 14px; font-family: inherit; background: #fff; }
+    .or-search-box button { padding: 14px 24px; background: #667eea; color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .or-search-box button:hover { background: #5a6fd6; }
+    .or-stats { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+    .or-stat-card { flex: 1; min-width: 120px; background: #fff; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+    .or-stat-card .num { font-size: 24px; font-weight: 800; color: #667eea; }
+    .or-stat-card .label { font-size: 12px; color: #6b7280; margin-top: 2px; }
+    .or-layout { display: flex; gap: 24px; flex-wrap: wrap; }
+    .or-main { flex: 2; min-width: 0; }
+    .or-sidebar { flex: 1; min-width: 280px; }
+    .or-card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 24px rgba(102,126,234,0.08); }
+    .or-card h2 { font-size: 18px; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .or-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: #1a1a2e; }
+    .or-loading { text-align: center; padding: 60px 20px; color: #6b7280; }
+    .or-loading .spinner { display: inline-block; width: 40px; height: 40px; border: 4px solid #e5e7eb; border-top-color: #667eea; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .or-error { text-align: center; padding: 40px; color: #ef4444; }
+    .or-retry-btn { margin-top: 12px; padding: 10px 20px; background: #667eea; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .or-no-results { text-align: center; padding: 40px; color: #9ca3af; }
+    .or-no-results h3 { font-size: 20px; margin-bottom: 8px; color: #6b7280; }
+    /* Company Card */
+    .or-company-card { border: 2px solid #e5e7eb; border-radius: 16px; padding: 20px; margin-bottom: 16px; cursor: pointer; transition: all 0.2s; background: #fff; }
+    .or-company-card:hover { border-color: #667eea; box-shadow: 0 8px 24px rgba(102,126,234,0.12); }
+    .or-company-card.expanded { border-color: #667eea; }
+    .or-company-top { display: flex; gap: 16px; align-items: flex-start; }
+    .or-company-logo { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; background: #f3f4f6; flex-shrink: 0; }
+    .or-company-logo-placeholder { width: 64px; height: 64px; border-radius: 12px; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; font-weight: 800; flex-shrink: 0; }
+    .or-company-info { flex: 1; min-width: 0; }
+    .or-company-info h3 { font-size: 18px; font-weight: 800; margin-bottom: 2px; }
+    .or-company-tagline { font-size: 13px; color: #6b7280; margin-bottom: 6px; }
+    .or-company-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: #6b7280; margin-bottom: 8px; }
+    .or-company-meta span { display: flex; align-items: center; gap: 4px; }
+    .or-company-badge { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; color: #fff; }
+    .or-company-stats { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
+    .or-company-stat { text-align: center; background: #f8faff; padding: 8px 16px; border-radius: 8px; }
+    .or-company-stat .val { font-size: 18px; font-weight: 800; color: #667eea; }
+    .or-company-stat .lbl { font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+    .or-expand-icon { font-size: 20px; color: #9ca3af; margin-left: 8px; flex-shrink: 0; }
+    /* Branch Card */
+    .or-branch-list { margin-top: 12px; border-top: 1px solid #f3f4f6; padding-top: 12px; }
+    .or-branch-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: all 0.15s; }
+    .or-branch-card:hover { border-color: #667eea; background: #f8faff; }
+    .or-branch-card.selected { border-color: #43e97b; background: #f0fdf4; }
+    .or-branch-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+    .or-branch-address { font-size: 12px; color: #6b7280; margin-bottom: 2px; }
+    .or-branch-phone { font-size: 12px; color: #667eea; font-weight: 600; }
+    .or-branch-type-badge { font-size: 10px; padding: 1px 8px; border-radius: 4px; background: #f3f4f6; font-weight: 600; }
+    .or-branch-order-btn { margin-top: 8px; padding: 8px 16px; background: #43e97b; color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; float: right; }
+    .or-branch-order-btn:hover { background: #34d974; }
+    /* Product Grid */
+    .or-product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; max-height: 420px; overflow-y: auto; padding: 4px 0; }
+    .or-product { border: 2px solid #e5e7eb; border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.15s; background: #fff; }
+    .or-product:hover { border-color: #667eea; }
+    .or-product.selected { border-color: #43e97b; background: #f0fdf4; }
+    .or-product .p-name { font-size: 12px; font-weight: 700; margin-bottom: 2px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .or-product .p-price { font-size: 15px; font-weight: 800; color: #667eea; }
+    .or-product .p-category { font-size: 9px; color: #9ca3af; margin-top: 2px; }
+    .or-product .p-in-cart { font-size: 10px; color: #43e97b; font-weight: 700; margin-top: 4px; }
+    /* Cart */
+    .or-cart-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
+    .or-cart-item:last-child { border-bottom: none; }
+    .or-cart-item .ci-name { flex: 1; font-size: 13px; font-weight: 600; }
+    .or-cart-item .ci-qty { width: 28px; text-align: center; font-weight: 700; font-size: 13px; }
+    .or-cart-item .ci-price { font-weight: 800; color: #667eea; font-size: 13px; min-width: 55px; text-align: right; }
+    .or-cart-item .ci-remove { color: #ef4444; cursor: pointer; font-size: 16px; padding: 2px; }
+    .or-qty-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid #d1d5db; background: #fff; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
+    .or-qty-btn:hover { background: #f3f4f6; }
+    .or-total { display: flex; justify-content: space-between; padding: 12px 0; font-size: 18px; font-weight: 800; border-top: 2px solid #667eea; margin-top: 8px; }
+    .or-empty-cart { text-align: center; padding: 20px; color: #9ca3af; }
+    .or-customer-fields input { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; margin-bottom: 8px; font-family: inherit; }
+    .or-customer-fields input:focus { outline: none; border-color: #667eea; }
+    .or-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .or-btn:hover { opacity: 0.92; }
+    .or-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .or-success { text-align: center; padding: 30px; }
+    .or-success h2 { color: #43e97b; margin-bottom: 8px; }
+    /* AI Assistant */
+    .or-ai-toggle { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none; font-size: 24px; cursor: pointer; box-shadow: 0 8px 24px rgba(102,126,234,0.3); z-index: 100; }
+    .or-ai-toggle:hover { transform: scale(1.05); }
+    .or-ai-panel { position: fixed; bottom: 90px; right: 24px; width: 360px; max-height: 480px; background: #fff; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); display: none; flex-direction: column; z-index: 100; overflow: hidden; }
+    .or-ai-panel.open { display: flex; }
+    .or-ai-header { padding: 14px 16px; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+    .or-ai-header button { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
+    .or-ai-msgs { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .or-ai-msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 13px; line-height: 1.5; }
+    .or-ai-msg.bot { background: #f3f4f6; align-self: flex-start; }
+    .or-ai-msg.user { background: #667eea; color: #fff; align-self: flex-end; }
+    .or-ai-inputs { display: flex; padding: 10px; border-top: 1px solid #e5e7eb; gap: 8px; }
+    .or-ai-inputs input { flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; font-family: inherit; }
+    .or-ai-inputs button { padding: 10px 16px; background: #667eea; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
+    /* Product search inside branch */
+    .or-prod-search { margin-bottom: 10px; }
+    .or-prod-search input { width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-family: inherit; }
+    .or-prod-search input:focus { border-color: #667eea; outline: none; }
+    .or-branch-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .or-branch-header h3 { margin: 0; }
+    .or-back-btn { background: none; border: none; color: #667eea; font-size: 14px; font-weight: 600; cursor: pointer; padding: 4px 8px; }
+    .or-back-btn:hover { text-decoration: underline; }
+    @media (max-width: 768px) { .or-layout { flex-direction: column; } .or-sidebar { min-width: 0; } .or-ai-panel { width: calc(100% - 32px); right: 16px; bottom: 80px; } }
+    .business-badge { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; }
+    .business-badge.retail { background: #dbeafe; color: #1d4ed8; }
+    .business-badge.supermarket { background: #dcfce7; color: #16a34a; }
+    .business-badge.restaurant { background: #fef3c7; color: #d97706; }
+    .business-badge.pharmacy { background: #fce7f3; color: #db2777; }
+    .business-badge.hardware { background: #e5e7eb; color: #374151; }
+    .business-badge.wholesale { background: #ede9fe; color: #7c3aed; }
+    .business-badge.electronics { background: #e0f2fe; color: #0284c7; }
+    .business-badge.clothing { background: #fdf2f8; color: #c026d3; }
+  </style>
+</head>
+<body>
+  <div class="or-header">
+    <h1>📦 Order Relay</h1>
+    <p>Find stores near you, browse products, and place your order — we'll have it ready when you arrive</p>
+    <div style="position:absolute;top:16px;right:16px;display:flex;gap:8px;">
+      <button id="cartHeaderBtn" onclick="scrollToCart()" style="background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:44px;height:44px;font-size:20px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;position:relative;">
+        🛒<span id="cartBadge" style="position:absolute;top:-4px;right:-4px;background:#22c55e;color:#fff;font-size:10px;font-weight:800;border-radius:50%;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;border:2px solid #667eea;"></span>
+      </button>
+      <button id="notifBellBtn" onclick="toggleNotifPanel()" style="background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:44px;height:44px;font-size:20px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;position:relative;">
+        🔔<span id="notifBadge" style="position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;border-radius:50%;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;border:2px solid #667eea;"></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="or-container" id="app">
+    <!-- SEARCH SECTION -->
+    <div class="or-search-section">
+      <div class="or-search-box">
+        <input type="text" id="searchInput" placeholder="Search by store name, location, business type, branch..." oninput="doSearch()">
+        <select id="typeFilter" onchange="doSearch()">
+          <option value="">All Business Types</option>
+          <option value="supermarket">Supermarket</option>
+          <option value="retail">Retail Store</option>
+          <option value="restaurant">Restaurant</option>
+          <option value="pharmacy">Pharmacy</option>
+          <option value="hardware">Hardware</option>
+          <option value="wholesale">Wholesale</option>
+          <option value="electronics">Electronics</option>
+          <option value="clothing">Clothing</option>
+        </select>
+        <button onclick="doSearch()">🔍 Search</button>
+      </div>
+    </div>
+
+    <!-- STATS BAR -->
+    <div class="or-stats" id="statsBar"></div>
+
+    <!-- MAIN LAYOUT -->
+    <div class="or-layout">
+      <div class="or-main">
+        <div id="resultsArea"></div>
+      </div>
+      <div class="or-sidebar">
+        <!-- Cart -->
+        <div class="or-card" id="cartCard">
+          <h2>🛒 Your Order</h2>
+          <div id="branchInfo" style="font-size:12px;color:#6b7280;margin-bottom:8px;"></div>
+          <div id="cartItems"></div>
+          <div id="cartTotal" style="display:none;" class="or-total"><span>Total</span><span id="totalAmount">$0.00</span></div>
+            <div class="or-customer-fields" id="customerFields" style="display:none;margin-top:10px;">
+              <input type="text" id="customerName" placeholder="Your name *">
+              <input type="tel" id="customerPhone" placeholder="Phone (optional)">
+              <input type="text" id="customerLocation" placeholder="Your location (e.g. Harare CBD)">
+              <div style="display:flex;gap:8px;margin-bottom:8px;">
+                <select id="payMethod" style="flex:1;padding:12px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;font-family:inherit;">
+                  <option value="">Pay with...</option>
+                  <option value="cash">💵 Cash</option>
+                  <option value="ecocash">📱 EcoCash</option>
+                  <option value="onemoney">📱 OneMoney</option>
+                  <option value="mpesa">📱 M-Pesa</option>
+                  <option value="innbucks">📱 InnBucks</option>
+                  <option value="card">💳 Card</option>
+                  <option value="transfer">🏦 Transfer</option>
+                </select>
+                <select id="payCurrency" style="flex:1;padding:12px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;font-family:inherit;">
+                  <option value="">Currency</option>
+                </select>
+              </div>
+              <input type="text" id="customerNotes" placeholder="Notes / pickup time (optional)">
+              <button class="or-btn" id="submitBtn" onclick="submitOrder()">📨 Send Order</button>
+            </div>
+          <div class="or-empty-cart" id="emptyCart">Your cart is empty.<br>Select a branch above and tap products to add.</div>
+        </div>
+        <div class="or-card" id="successCard" style="display:none;">
+          <div class="or-success">
+            <div style="font-size:56px;">✅</div>
+            <h2>Order Sent!</h2>
+            <p>Your order has been sent to the store. They'll prepare it for you.</p>
+            <button class="or-btn" onclick="resetOrder()" style="background:linear-gradient(135deg,#43e97b,#38f9d7);">🔄 New Order</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quantity Modal -->
+  <div id="qtyModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;justify-content:center;align-items:center;" onclick="closeQtyModal(event)">
+    <div style="background:#fff;border-radius:16px;padding:24px;width:300px;box-shadow:0 20px 60px rgba(0,0,0,0.2);" onclick="event.stopPropagation()">
+      <div style="font-size:18px;font-weight:800;margin-bottom:4px;" id="qtyModalName"></div>
+      <div style="font-size:13px;color:#6b7280;margin-bottom:16px;" id="qtyModalPrice"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <button style="width:40px;height:40px;border-radius:50%;border:1px solid #d1d5db;background:#fff;font-size:20px;font-weight:700;cursor:pointer;" onclick="adjQty(-1)">−</button>
+        <input type="number" id="qtyModalInput" value="1" min="1" style="flex:1;text-align:center;padding:12px;border:2px solid #667eea;border-radius:10px;font-size:18px;font-weight:700;font-family:inherit;">
+        <button style="width:40px;height:40px;border-radius:50%;border:1px solid #d1d5db;background:#fff;font-size:20px;font-weight:700;cursor:pointer;" onclick="adjQty(1)">+</button>
+      </div>
+      <button style="width:100%;padding:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;" onclick="confirmQty()">Add to Cart</button>
+      <button style="width:100%;padding:10px;background:none;border:none;color:#6b7280;font-size:14px;margin-top:6px;cursor:pointer;" onclick="closeQtyModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Notification Panel -->
+  <div class="or-ai-panel" id="notifPanel" style="background:#1e293b;">
+    <div class="or-ai-header" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
+      <span>🔔 Order Updates</span>
+      <button onclick="toggleNotifPanel()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div class="or-ai-msgs" id="notifMessages" style="background:#1e293b;">
+      <div class="or-ai-msg bot" style="background:#334155;color:#e2e8f0;">Your order notifications will appear here.</div>
+    </div>
+  </div>
+
+  <!-- AI Assistant -->
+  <button class="or-ai-toggle" id="aiToggle" onclick="toggleAI()">🤖</button>
+  <div class="or-ai-panel" id="aiPanel">
+    <div class="or-ai-header">
+      <span>🤖 Order Relay Assistant</span>
+      <button onclick="toggleAI()">✕</button>
+    </div>
+    <div class="or-ai-msgs" id="aiMessages">
+      <div class="or-ai-msg bot">Hi! I can help you find stores, products, or place orders. What are you looking for?</div>
+    </div>
+    <div class="or-ai-inputs">
+      <input type="text" id="aiInput" placeholder="Ask me anything..." onkeydown="if(event.key==='Enter')askAI()">
+      <button onclick="askAI()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://genesisbackend-cu69.onrender.com/api/inventory';
+    let companies = [];
+
+    // Register Service Worker for push notifications
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+
+    // PWA Install prompt
+    let deferredPrompt = null;
+    let installResolved = false;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installResolved = false;
+      showInstallBanner();
+    });
+    window.addEventListener('appinstalled', () => {
+      installResolved = true;
+      const banner = document.getElementById('pwaInstallBanner');
+      if (banner) { banner.innerHTML = '<div style="text-align:center;padding:8px;font-weight:700;">✅ Installed! Open from your home screen.</div>'; setTimeout(() => banner.remove(), 4000); }
+    });
+
+    function showInstallBanner() {
+      let banner = document.getElementById('pwaInstallBanner');
+      if (banner) return;
+      banner = document.createElement('div');
+      banner.id = 'pwaInstallBanner';
+      banner.style.cssText = 'position:fixed;bottom:90px;right:90px;left:16px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:14px;padding:14px 18px;z-index:99;box-shadow:0 8px 30px rgba(102,126,234,0.4);display:flex;align-items:center;gap:12px;cursor:pointer;';
+      banner.innerHTML = `
+        <div style="font-size:28px;">📲</div>
+        <div style="flex:1;">
+          <div style="font-weight:800;font-size:14px;">Install Order Relay</div>
+          <div style="font-size:12px;opacity:0.85;">Get faster access — add to your home screen</div>
+        </div>
+        <button onclick="dismissInstallBanner()" style="background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:28px;height:28px;color:#fff;font-size:14px;cursor:pointer;">✕</button>
+      `;
+      banner.onclick = async () => {
+        if (!deferredPrompt) { showManualInstall(); return; }
+        try {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          deferredPrompt = null;
+          if (outcome === 'accepted') {
+            banner.innerHTML = '<div style="text-align:center;padding:8px;font-weight:700;">✅ Installing... Check your home screen.</div>';
+            setTimeout(() => banner.remove(), 5000);
+          } else {
+            banner.innerHTML = '<div style="text-align:center;padding:8px;font-weight:700;">❌ Install cancelled. Tap here for manual instructions.</div>';
+            banner.onclick = showManualInstall;
+          }
+        } catch (e) {
+          banner.innerHTML = '<div style="text-align:center;padding:8px;font-weight:700;">⚠️ Install not supported on this browser. Tap for manual steps.</div>';
+          banner.onclick = showManualInstall;
+        }
+      };
+      document.body.appendChild(banner);
+    }
+
+    function showManualInstall() {
+      const existing = document.getElementById('pwaManualBox');
+      if (existing) { existing.remove(); return; }
+      const box = document.createElement('div');
+      box.id = 'pwaManualBox';
+      box.style.cssText = 'position:fixed;bottom:90px;right:90px;left:16px;background:#1e293b;color:#fff;border-radius:14px;padding:18px;z-index:100;box-shadow:0 8px 30px rgba(0,0,0,0.4);max-height:60vh;overflow-y:auto;';
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      box.innerHTML = isIOS ? `
+        <div style="font-weight:800;font-size:15px;margin-bottom:10px;">📲 Manual Install (iOS)</div>
+        <div style="font-size:13px;color:#cbd5e1;line-height:1.6;">
+          1. Tap the <b>Share</b> button <span style="font-size:20px;">📤</span><br>
+          2. Scroll down<br>
+          3. Tap <b>"Add to Home Screen"</b><br>
+          4. Tap <b>"Add"</b> (top right)<br><br>
+          The Order Relay icon will appear on your home screen!
+        </div>
+      ` : `
+        <div style="font-weight:800;font-size:15px;margin-bottom:10px;">📲 Manual Install (Android/Chrome)</div>
+        <div style="font-size:13px;color:#cbd5e1;line-height:1.6;">
+          1. Tap the Chrome menu <span style="font-size:18px;">⋮</span> (3 dots)<br>
+          2. Tap <b>"Add to Home Screen"</b><br>
+          3. Tap <b>"Add"</b><br><br>
+          Or use your browser's <b>Install</b> option in the address bar.
+        </div>
+      `;
+      box.innerHTML += '<button onclick="this.parentElement.remove()" style="margin-top:12px;padding:10px 20px;background:#667eea;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;width:100%;">Got it ✕</button>';
+      document.body.appendChild(box);
+    }
+
+    function dismissInstallBanner() {
+      const banner = document.getElementById('pwaInstallBanner');
+      if (banner) banner.remove();
+    }
+
+    // Play notification sound using AudioContext
+    function playNotifSound() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.setValueAtTime(660, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.4);
+        setTimeout(() => {
+          const osc2 = ctx.createOscillator();
+          const gain2 = ctx.createGain();
+          osc2.connect(gain2);
+          gain2.connect(ctx.destination);
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(1100, ctx.currentTime);
+          osc2.frequency.setValueAtTime(880, ctx.currentTime + 0.2);
+          gain2.gain.setValueAtTime(0.4, ctx.currentTime);
+          gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+          osc2.start(ctx.currentTime);
+          osc2.stop(ctx.currentTime + 0.5);
+        }, 300);
+      } catch (_) {}
+    }
+    let selectedBranch = null;
+    let selectedBranchProducts = [];
+    let cart = [];
+    let userLocation = null;
+
+    // --- GEOLOCATION ---
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          p => { userLocation = { lat: p.coords.latitude, lng: p.coords.longitude }; },
+          () => {}, { timeout: 5000 }
+        );
+      }
+    }
+
+    function calcDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; const dLat = (lat2-lat1)*Math.PI/180; const dLon = (lon2-lon1)*Math.PI/180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    // --- INIT ---
+    async function init() {
+      getLocation();
+      document.getElementById('resultsArea').innerHTML = '<div class="or-loading"><div class="spinner"></div><div>Loading stores...</div></div>';
+      try {
+        companies = await (await fetch(`${API}/public/order-relay/companies/`)).json();
+        renderStats();
+        renderCompanies(companies);
+      } catch (e) {
+        document.getElementById('resultsArea').innerHTML = '<div class="or-error">Failed to load stores. <button class="or-retry-btn" onclick="init()">Retry</button></div>';
+      }
+    }
+
+    function renderStats() {
+      const total = companies.length;
+      const branches = companies.reduce((s, c) => s + (c.branch_count || 0), 0);
+      const sales = companies.reduce((s, c) => s + (c.total_sales || 0), 0);
+      const types = [...new Set(companies.map(c => c.business_type).filter(Boolean))];
+      document.getElementById('statsBar').innerHTML = `
+        <div class="or-stat-card"><div class="num">${total}</div><div class="label">Stores</div></div>
+        <div class="or-stat-card"><div class="num">${branches}</div><div class="label">Branches</div></div>
+        <div class="or-stat-card"><div class="num">${sales.toLocaleString()}</div><div class="label">Total Sales</div></div>
+        <div class="or-stat-card"><div class="num">${types.length}</div><div class="label">Industries</div></div>
+      `;
+    }
+
+    // --- SEARCH ---
+    function doSearch() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const type = document.getElementById('typeFilter').value;
+      let filtered = companies;
+      if (q) {
+        filtered = companies.filter(c =>
+          c.name.toLowerCase().includes(q) ||
+          c.tagline.toLowerCase().includes(q) ||
+          c.business_type.toLowerCase().includes(q) ||
+          c.address.toLowerCase().includes(q) ||
+          (c.branches || []).some(b =>
+            b.name.toLowerCase().includes(q) ||
+            b.location.toLowerCase().includes(q) ||
+            b.address.toLowerCase().includes(q)
+          )
+        );
+      }
+      if (type) filtered = filtered.filter(c => c.business_type === type);
+      renderCompanies(filtered);
+    }
+
+    // --- RENDER COMPANIES ---
+    function renderCompanies(list) {
+      const area = document.getElementById('resultsArea');
+      if (!list || list.length === 0) {
+        area.innerHTML = '<div class="or-no-results"><h3>No stores found</h3><p>Try a different search term or browse all stores.</p></div>';
+        return;
+      }
+      area.innerHTML = list.map(c => {
+        const initial = (c.name || '?')[0].toUpperCase();
+        const hasLogo = c.logo && c.logo.startsWith('http');
+        const typeClass = c.business_type || 'other';
+        const typeLabel = c.business_type_label || c.business_type || 'Business';
+
+        return `<div class="or-company-card">
+          <div class="or-company-top" onclick="toggleCompany(${c.id})">
+            ${hasLogo ? `<img class="or-company-logo" src="${c.logo}" alt="${c.name}">` : `<div class="or-company-logo-placeholder">${initial}</div>`}
+            <div class="or-company-info">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <h3>${c.name}</h3>
+                <span class="business-badge ${typeClass}">${typeLabel}</span>
+              </div>
+              ${c.tagline ? `<div class="or-company-tagline">${c.tagline}</div>` : ''}
+              <div class="or-company-meta">
+                ${c.address ? `<span>📍 ${c.address}</span>` : ''}
+                ${c.phone ? `<span>📞 ${c.phone}</span>` : ''}
+                ${c.country ? `<span>🌍 ${c.country}</span>` : ''}
+              </div>
+              <div class="or-company-stats">
+                <div class="or-company-stat"><div class="val">${c.branch_count || 0}</div><div class="lbl">Branches</div></div>
+                <div class="or-company-stat"><div class="val">${(c.total_sales || 0).toLocaleString()}</div><div class="lbl">Sales</div></div>
+              </div>
+            </div>
+            <span class="or-expand-icon" id="expandIcon-${c.id}">▼</span>
+          </div>
+          <div class="or-branch-list" id="branches-${c.id}" style="display:none;">
+            ${(c.branches || []).map(b => renderBranch(b)).join('')}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function toggleCompany(id) {
+      const el = document.getElementById(`branches-${id}`);
+      const icon = document.getElementById(`expandIcon-${id}`);
+      if (el.style.display === 'none') {
+        el.style.display = 'block';
+        icon.textContent = '▲';
+      } else {
+        el.style.display = 'none';
+        icon.textContent = '▼';
+      }
+    }
+
+    function renderBranch(b) {
+      const dist = userLocation ? calcDistance(userLocation.lat, userLocation.lng, parseFloat(b.lat || 0) || -17.825, parseFloat(b.lng || 0) || 31.033) : null;
+      return `<div class="or-branch-card" id="branchCard-${b.id}" onclick="selectBranch(${b.id}, '${b.name.replace(/'/g, "\\'")}')">
+        <div class="or-branch-name">
+          🏪 ${b.name}
+          <span class="or-branch-type-badge">${b.branch_type_label || b.branch_type || ''}</span>
+          ${dist !== null && dist < 50 ? '<span style="font-size:11px;color:#43e97b;font-weight:700;">📍 Near you</span>' : ''}
+        </div>
+        ${b.location ? `<div class="or-branch-address">📍 ${b.location}</div>` : ''}
+        ${b.address ? `<div class="or-branch-address">${b.address}</div>` : ''}
+        ${b.phone ? `<div class="or-branch-phone">📞 ${b.phone}</div>` : ''}
+        ${dist !== null ? `<div style="font-size:11px;color:#6b7280;margin-top:2px;">~${dist.toFixed(1)} km away</div>` : ''}
+        <button class="or-branch-order-btn" onclick="event.stopPropagation();selectBranch(${b.id}, '${b.name.replace(/'/g, "\\'")}')">📦 Order Here</button>
+      </div>`;
+    }
+
+    // --- SELECT BRANCH ---
+    async function selectBranch(branchId, branchName) {
+      selectedBranch = { id: branchId, name: branchName };
+      document.getElementById('branchInfo').textContent = `Ordering from: ${branchName}`;
+      cart = [];
+      renderCart();
+      document.getElementById('resultsArea').innerHTML = '<div class="or-loading"><div class="spinner"></div><div>Loading products...</div></div>';
+      try {
+        selectedBranchProducts = await (await fetch(`${API}/public/order-relay/products/${branchId}/`)).json();
+        renderProducts();
+      } catch (e) {
+        document.getElementById('resultsArea').innerHTML = '<div class="or-error">Failed to load products.</div>';
+      }
+      // Populate currency dropdown from the company's active currencies
+      const curSel = document.getElementById('payCurrency');
+      if (curSel) {
+        const branchCompany = companies.find(c => c.branches && c.branches.some(b => b.id === branchId));
+        const currencies = (branchCompany && branchCompany.currencies) || [];
+        if (currencies.length > 0) {
+          curSel.innerHTML = '<option value="">Currency</option>' + currencies.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+      }
+    }
+
+    function renderProducts() {
+      const cats = [...new Set(selectedBranchProducts.map(p => p.category).filter(Boolean))];
+      const area = document.getElementById('resultsArea');
+      area.innerHTML = `
+        <div class="or-card">
+          <div class="or-branch-header">
+            <button class="or-back-btn" onclick="backToCompanies()">← All Stores</button>
+            <h3>🏪 ${selectedBranch.name}</h3>
+          </div>
+          <div class="or-prod-search"><input type="text" id="prodSearch" placeholder="Search products..." oninput="filterProducts()"></div>
+          ${cats.length > 0 ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;" id="catFilters">
+            <button class="or-retry-btn" style="font-size:11px;padding:4px 12px;" onclick="filterByCategory('')">All</button>
+            ${cats.map(c => `<button class="or-retry-btn" style="font-size:11px;padding:4px 12px;background:#f3f4f6;color:#374151;" onclick="filterByCategory('${c}')">${c}</button>`).join('')}
+          </div>` : ''}
+          <div class="or-product-grid" id="productGrid"></div>
+        </div>
+      `;
+      renderProductGrid();
+    }
+
+    function renderProductGrid() {
+      const query = (document.getElementById('prodSearch')?.value || '').toLowerCase();
+      const activeCat = window._activeCat || '';
+      let filtered = selectedBranchProducts;
+      if (query) filtered = filtered.filter(p => p.name.toLowerCase().includes(query) || (p.sku && p.sku.toLowerCase().includes(query)));
+      if (activeCat) filtered = filtered.filter(p => p.category === activeCat);
+      const grid = document.getElementById('productGrid');
+      if (filtered.length === 0) { grid.innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af;">No products found</div>'; return; }
+      grid.innerHTML = filtered.map(p => {
+        const inCart = cart.find(c => c.product_id === p.id);
+        const qty = inCart ? inCart.quantity : 0;
+        return `<div class="or-product ${qty > 0 ? 'selected' : ''}" onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})">
+          <div class="p-name">${p.name}</div>
+          <div class="p-price">$${(p.price || 0).toFixed(2)}</div>
+          ${p.category ? `<div class="p-category">${p.category}</div>` : ''}
+          ${p.sku ? `<div class="p-category">${p.sku}</div>` : ''}
+          ${qty > 0 ? `<div class="p-in-cart">✓ ${qty} in cart</div>` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    function filterProducts() { renderProductGrid(); }
+    function filterByCategory(cat) { window._activeCat = cat; renderProductGrid(); }
+
+    function backToCompanies() {
+      selectedBranch = null; selectedBranchProducts = [];
+      document.getElementById('branchInfo').textContent = '';
+      renderCompanies(companies);
+    }
+
+    // --- CART ---
+    let _qtyProduct = null;
+
+    function addToCart(id, name, price) {
+      _qtyProduct = { id, name, price };
+      document.getElementById('qtyModalName').textContent = name;
+      document.getElementById('qtyModalPrice').textContent = '$' + price.toFixed(2) + ' each';
+      document.getElementById('qtyModalInput').value = 1;
+      document.getElementById('qtyModal').style.display = 'flex';
+      document.getElementById('qtyModalInput').focus();
+      document.getElementById('qtyModalInput').select();
+    }
+
+    function adjQty(delta) {
+      const input = document.getElementById('qtyModalInput');
+      let v = parseInt(input.value) || 1;
+      v = Math.max(1, v + delta);
+      input.value = v;
+    }
+
+    function confirmQty() {
+      const qty = parseInt(document.getElementById('qtyModalInput').value) || 1;
+      if (!_qtyProduct) return;
+      const { id, name, price } = _qtyProduct;
+      const existing = cart.find(c => c.product_id === id);
+      if (existing) existing.quantity += qty;
+      else cart.push({ product_id: id, name, price, quantity: qty });
+      closeQtyModal();
+      renderProductGrid();
+      renderCart();
+    }
+
+    function closeQtyModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('qtyModal').style.display = 'none';
+      _qtyProduct = null;
+    }
+
+    function updateQty(id, delta) {
+      const item = cart.find(c => c.product_id === id);
+      if (!item) return;
+      item.quantity += delta;
+      if (item.quantity <= 0) cart = cart.filter(c => c.product_id !== id);
+      renderProductGrid();
+      renderCart();
+    }
+
+    function removeItem(id) { cart = cart.filter(c => c.product_id !== id); renderProductGrid(); renderCart(); }
+
+    function updateCartBadge() {
+      const count = cart.reduce((s, i) => s + i.quantity, 0);
+      const badge = document.getElementById('cartBadge');
+      if (count > 0) {
+        badge.textContent = count > 99 ? '99+' : count;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    function scrollToCart() {
+      document.getElementById('cartCard').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cartItems');
+      const totalEl = document.getElementById('cartTotal');
+      const empty = document.getElementById('emptyCart');
+      const customerFields = document.getElementById('customerFields');
+      if (cart.length === 0 || !selectedBranch) {
+        container.innerHTML = '';
+        totalEl.style.display = 'none';
+        customerFields.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+      customerFields.style.display = 'block';
+      totalEl.style.display = 'flex';
+      let total = 0;
+      container.innerHTML = cart.map(item => {
+        const lt = item.price * item.quantity; total += lt;
+        return `<div class="or-cart-item">
+          <span class="ci-name">${item.name}</span>
+          <button class="or-qty-btn" onclick="updateQty(${item.product_id},-1)">−</button>
+          <span class="ci-qty">${item.quantity}</span>
+          <button class="or-qty-btn" onclick="updateQty(${item.product_id},1)">+</button>
+          <span class="ci-price">$${lt.toFixed(2)}</span>
+          <span class="ci-remove" onclick="removeItem(${item.product_id})">✕</span>
+        </div>`;
+      }).join('');
+      document.getElementById('totalAmount').textContent = `$${total.toFixed(2)}`;
+      updateCartBadge();
+    }
+
+    function showError(msg) {
+      const existing = document.getElementById('orErrorBox');
+      if (existing) existing.remove();
+      const box = document.createElement('div');
+      box.id = 'orErrorBox';
+      box.style.cssText = 'background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px;margin-bottom:10px;color:#dc2626;font-size:13px;font-weight:600;';
+      box.textContent = '❌ ' + msg;
+      document.getElementById('customerFields').prepend(box);
+      setTimeout(() => box.remove(), 8000);
+    }
+
+    let lastOrderId = null;
+
+    async function submitOrder() {
+      const name = document.getElementById('customerName').value.trim();
+      if (!name) { showError('Please enter your name'); return; }
+      if (cart.length === 0) { showError('Cart is empty'); return; }
+      const total = Math.round(cart.reduce((s, i) => s + i.price * i.quantity, 0) * 100) / 100;
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true; btn.textContent = '⏳ Sending...';
+
+      // Get location if available
+      let lat = null, lng = null, locName = '';
+      if (userLocation) { lat = userLocation.lat; lng = userLocation.lng; }
+      const locInput = document.getElementById('customerLocation')?.value?.trim();
+      if (locInput) locName = locInput;
+
+      try {
+        const body = {
+          branch_id: selectedBranch.id,
+          customer_name: name,
+          customer_phone: document.getElementById('customerPhone').value.trim(),
+          notes: document.getElementById('customerNotes').value.trim(),
+          items: cart.map(i => ({ product_id: i.product_id, name: i.name, quantity: i.quantity, price: parseFloat(i.price.toFixed(2)) })),
+          total_amount: total, currency: 'USD',
+          customer_lat: lat, customer_lng: lng,
+          customer_location_name: locName,
+          payment_method: document.getElementById('payMethod').value,
+          payment_currency: document.getElementById('payCurrency').value,
+        };
+        const r = await fetch(`${API}/public/order-relay/`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+        });
+        if (!r.ok) {
+          let errMsg = 'Order failed';
+          try { const e = await r.json(); errMsg = e.error || Object.values(e).flat().join('; ') || `Server error (${r.status})`; } catch (_) { errMsg = `Server error (${r.status})`; }
+          throw new Error(errMsg);
+        }
+        const orderResult = await r.json();
+        lastOrderId = orderResult.id;
+        showOrderStatus(orderResult);
+      } catch (e) { showError(e.message); btn.disabled = false; btn.textContent = '📨 Send Order'; }
+    }
+
+    function showOrderStatus(order) {
+      const card = document.getElementById('successCard');
+      const status = order.status || 'pending';
+      const readyAt = order.ready_by ? new Date(order.ready_by) : null;
+      const readyTime = readyAt ? readyAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null;
+
+      const standbyRef = order.standby_reference || '';
+      let statusEmoji = '⏳', statusText = 'Pending - waiting for store to accept';
+      if (status === 'accepted') { statusEmoji = '✅'; statusText = readyTime ? `Accepted - Ready by ${readyTime}` : 'Accepted by store'; }
+      else if (status === 'rejected') { statusEmoji = '❌'; statusText = `Rejected${order.reject_reason ? ': ' + order.reject_reason : ''}`; }
+      else if (status === 'fulfilled') { statusEmoji = '🎉'; statusText = 'Ready for pickup!'; }
+      const payM = order.payment_method || document.getElementById('payMethod').value || '';
+      const payC = order.payment_currency || document.getElementById('payCurrency').value || '';
+      const payLabel = payM ? `${payM.toUpperCase()}${payC ? ' ' + payC : ''}` : '';
+
+      card.innerHTML = `
+        <div class="or-success">
+          <div style="font-size:56px;margin-bottom:8px;">✅</div>
+          <h2>Order #${order.id} Sent!</h2>
+          <p style="color:#6b7280;margin-bottom:16px;">Your order has been sent to the store.</p>
+          <div style="background:#f8faff;border-radius:12px;padding:16px;margin-bottom:16px;text-align:left;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-weight:600;">Status:</span>
+              <span style="font-weight:700;" id="orderStatusText">${statusEmoji} ${statusText}</span>
+            </div>
+            ${standbyRef ? `<div style="display:flex;justify-content:space-between;margin-bottom:8px;background:#fef3c7;border-radius:8px;padding:6px 10px;">
+              <span style="font-weight:700;">🎫 Standby Code:</span>
+              <span style="font-weight:900;font-size:18px;color:#d97706;letter-spacing:2px;">${standbyRef}</span>
+            </div>` : ''}
+            ${payLabel ? `<div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-weight:600;">Payment:</span>
+              <span>${payLabel}</span>
+            </div>` : ''}
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-weight:600;">Store:</span>
+              <span>${order.branch_name || selectedBranch?.name || ''}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+              <span style="font-weight:600;">Items:</span>
+              <span>${(order.items || cart).length}</span>
+            </div>
+          </div>
+          <p style="font-size:12px;color:#9ca3af;margin-bottom:16px;">Bookmark this page or note Order #${order.id} to check status later.</p>
+          <button class="or-btn" onclick="resetOrder()" style="background:linear-gradient(135deg,#43e97b,#38f9d7);color:#1a1a2e;margin-bottom:8px;">🔄 New Order</button>
+        </div>
+      `;
+      document.getElementById('cartCard').style.display = 'none';
+      card.style.display = 'block';
+
+      // Poll for status updates every 15s
+      if (order.id) startStatusPolling(order.id);
+    }
+
+    let statusPollTimer = null;
+    function startStatusPolling(orderId) {
+      if (statusPollTimer) clearInterval(statusPollTimer);
+      statusPollTimer = setInterval(async () => {
+        try {
+          const r = await fetch(`${API}/public/order-relay/status/${orderId}/`);
+          if (!r.ok) return;
+          const order = await r.json();
+          const statusEl = document.getElementById('orderStatusText');
+          if (!statusEl) { clearInterval(statusPollTimer); return; }
+          const readyAt = order.ready_by ? new Date(order.ready_by) : null;
+          const readyTime = readyAt ? readyAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null;
+          if (order.status === 'accepted') {
+            const ref = order.standby_reference || '';
+            const txt = readyTime ? `✅ Accepted - Ready by ${readyTime}` : '✅ Accepted by store';
+            statusEl.innerHTML = txt + (ref ? ` <span style="background:#fef3c7;padding:2px 8px;border-radius:4px;font-size:16px;font-weight:900;color:#d97706;">${ref}</span>` : '');
+          } else if (order.status === 'rejected') {
+            statusEl.innerHTML = `❌ Rejected${order.reject_reason ? ': ' + order.reject_reason : ''}`;
+            clearInterval(statusPollTimer);
+          } else if (order.status === 'fulfilled') {
+            statusEl.innerHTML = '🎉 Ready for pickup!';
+            clearInterval(statusPollTimer);
+          }
+        } catch (_) {}
+      }, 15000);
+    }
+
+    function resetOrder() {
+      cart = []; selectedBranch = null; selectedBranchProducts = [];
+      document.getElementById('customerName').value = '';
+      document.getElementById('customerPhone').value = '';
+      document.getElementById('customerNotes').value = '';
+      document.getElementById('cartCard').style.display = 'block';
+      document.getElementById('successCard').style.display = 'none';
+      document.getElementById('branchInfo').textContent = '';
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = false; btn.textContent = '📨 Send Order';
+      renderCart();
+      backToCompanies();
+    }
+
+    // --- AI ASSISTANT ---
+    function toggleAI() {
+      const p = document.getElementById('aiPanel');
+      p.classList.toggle('open');
+    }
+
+    function askAI() {
+      const input = document.getElementById('aiInput');
+      const q = input.value.trim();
+      if (!q) return;
+      const msgs = document.getElementById('aiMessages');
+      msgs.innerHTML += `<div class="or-ai-msg user">${escapeHtml(q)}</div>`;
+
+      const lower = q.toLowerCase();
+      let reply = '';
+
+      if (lower.includes('store') || lower.includes('company') || lower.includes('shop')) {
+        const names = companies.map(c => c.name).join(', ');
+        reply = `We have ${companies.length} stores: ${names}. You can search by name or location above!`;
+      } else if (lower.includes('branch') || lower.includes('location') || lower.includes('near')) {
+        if (userLocation) reply = 'We detected your location! Stores near you will show distance. Click a store to see branches.';
+        else reply = 'Allow location access to find stores near you, or search by city/area name above.';
+      } else if (lower.includes('product') || lower.includes('buy') || lower.includes('order')) {
+        reply = 'First select a branch from any store above, then browse products and add to your cart!';
+      } else if (lower.includes('how') || lower.includes('help') || lower.includes('what')) {
+        reply = 'Search for a store above, select a branch, pick products, enter your name, and send the order. The store will prepare it for pickup!';
+      } else if (lower.includes('price') || lower.includes('cost') || lower.includes('pay')) {
+        reply = 'Prices are shown in USD on each product. Payment is handled at the store when you pick up.';
+      } else if (lower.includes('hello') || lower.includes('hi')) {
+        reply = 'Hello! 👋 How can I help you today? Try searching for a store or asking about products.';
+      } else {
+        reply = `I'm not sure about "${q}". Try asking about stores, branches, products, or how ordering works!`;
+      }
+
+      setTimeout(() => {
+        msgs.innerHTML += `<div class="or-ai-msg bot">${reply}</div>`;
+        msgs.scrollTop = msgs.scrollHeight;
+      }, 400);
+      input.value = '';
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+    // --- NOTIFICATION BELL ---
+    const NOTIF_KEY = 'genesis_order_relay_orders';
+
+    function saveOrderToLocal(order) {
+      const stored = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
+      const exists = stored.find(o => o.id === order.id);
+      if (exists) { Object.assign(exists, order); }
+      else { stored.push(order); }
+      localStorage.setItem(NOTIF_KEY, JSON.stringify(stored));
+      updateNotifBadge();
+    }
+
+    function loadTrackedOrders() {
+      return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
+    }
+
+    function removeCompletedOrder(orderId) {
+      const stored = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
+      const filtered = stored.filter(o => o.id !== orderId);
+      localStorage.setItem(NOTIF_KEY, JSON.stringify(filtered));
+      updateNotifBadge();
+    }
+
+    const SEEN_KEY = 'genesis_order_relay_seen';
+
+    function getSeenIds() {
+      return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'));
+    }
+
+    function markSeen(id) {
+      const seen = getSeenIds();
+      seen.add(id);
+      localStorage.setItem(SEEN_KEY, JSON.stringify([...seen]));
+      updateNotifBadge();
+    }
+
+    function markAllSeen() {
+      const orders = loadTrackedOrders();
+      const seen = new Set([...getSeenIds(), ...orders.map(o => o.id)]);
+      localStorage.setItem(SEEN_KEY, JSON.stringify([...seen]));
+      updateNotifBadge();
+    }
+
+    function updateNotifBadge() {
+      const orders = loadTrackedOrders();
+      const badge = document.getElementById('notifBadge');
+      const seen = getSeenIds();
+      const unseen = orders.filter(o => !seen.has(o.id) && (o.status === 'pending' || o.status === 'accepted' || o.status === 'fulfilled'));
+      if (unseen.length > 0) {
+        badge.textContent = unseen.length;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    function toggleNotifPanel() {
+      const p = document.getElementById('notifPanel');
+      p.classList.toggle('open');
+      if (p.classList.contains('open')) {
+        markAllSeen();
+        renderNotifPanel();
+      }
+    }
+
+    function renderNotifPanel() {
+      const orders = loadTrackedOrders();
+      const msgs = document.getElementById('notifMessages');
+      if (orders.length === 0) {
+        msgs.innerHTML = '<div class="or-ai-msg bot" style="background:#334155;color:#94a3b8;">No orders yet. Place an order to track it here!</div>';
+        return;
+      }
+      msgs.innerHTML = orders.slice().reverse().map(o => {
+        let emoji = '⏳', label = 'Pending';
+        if (o.status === 'accepted') { emoji = '✅'; label = `Accepted${o.standby_reference ? ' - Ref: ' + o.standby_reference : ''}`; }
+        else if (o.status === 'rejected') { emoji = '❌'; label = `Rejected${o.reject_reason ? ': ' + o.reject_reason : ''}`; }
+        else if (o.status === 'fulfilled') { emoji = '🎉'; label = 'Ready for pickup!'; }
+        const time = o.updated_at ? new Date(o.updated_at).toLocaleString() : '';
+        const borderColor = o.status === 'accepted' ? '#43e97b' : o.status === 'rejected' ? '#ef4444' : o.status === 'fulfilled' ? '#f59e0b' : '#667eea';
+        return `<div style="background:#334155;border-radius:10px;padding:12px;margin-bottom:8px;border-left:4px solid ${borderColor};">
+          <div style="font-weight:800;font-size:14px;color:#f1f5f9;">${emoji} Order #${o.id}</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:3px;">🏪 ${o.branch_name || ''}</div>
+          <div style="font-size:13px;color:#e2e8f0;margin-top:4px;font-weight:600;">${label}</div>
+          ${time ? `<div style="font-size:10px;color:#64748b;margin-top:4px;">🕐 ${time}</div>` : ''}
+          ${o.status === 'fulfilled' || o.status === 'rejected' ? `<button onclick="removeCompletedOrder(${o.id});renderNotifPanel();" style="margin-top:8px;padding:6px 14px;background:rgba(100,116,139,0.4);border:none;border-radius:8px;color:#cbd5e1;font-size:11px;font-weight:600;cursor:pointer;">✕ Dismiss</button>` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    async function pollTrackedOrders() {
+      const orders = loadTrackedOrders();
+      const pending = orders.filter(o => o.status === 'pending' || o.status === 'accepted');
+      if (pending.length === 0) return;
+      for (const o of pending) {
+        try {
+          const r = await fetch(`${API}/public/order-relay/status/${o.id}/`);
+          if (!r.ok) continue;
+          const updated = await r.json();
+          if (updated.status !== o.status) {
+            o.status = updated.status;
+            o.standby_reference = updated.standby_reference || o.standby_reference;
+            o.reject_reason = updated.reject_reason || o.reject_reason;
+            o.updated_at = new Date().toISOString();
+            saveOrderToLocal(o);
+            markSeen(o.id);
+            // Show notification + sound
+            playNotifSound();
+            if ('Notification' in window && Notification.permission === 'granted') {
+              if (updated.status === 'accepted') {
+                new Notification('✅ Order Accepted!', {
+                  body: `Order #${o.id} at ${o.branch_name || 'store'} is ready.${o.standby_reference ? ' Ref: ' + o.standby_reference : ''} Time to head to the store!`,
+                  icon: '/genesislogo.png',
+                  tag: `order-${o.id}-accepted`,
+                  requireInteraction: true,
+                });
+              } else if (updated.status === 'rejected') {
+                new Notification('❌ Order Rejected', {
+                  body: `Order #${o.id} at ${o.branch_name || 'store'} was rejected.${o.reject_reason ? ' Reason: ' + o.reject_reason : ''}`,
+                  icon: '/genesislogo.png',
+                  tag: `order-${o.id}-rejected`,
+                  requireInteraction: true,
+                });
+              } else if (updated.status === 'fulfilled') {
+                new Notification('🎉 Ready for Pickup!', {
+                  body: `Order #${o.id} at ${o.branch_name || 'store'} is ready for pickup!`,
+                  icon: '/genesislogo.png',
+                  tag: `order-${o.id}-fulfilled`,
+                  requireInteraction: true,
+                });
+              }
+            }
+            // Also send to service worker for offline notification
+            if (navigator.serviceWorker?.controller) {
+              navigator.serviceWorker.controller.postMessage({
+                type: 'ORDER_UPDATE', order: o,
+              });
+            }
+          }
+        } catch (_) {}
+      }
+      updateNotifBadge();
+    }
+
+    // Track orders from success card
+    const _origShowOrderStatus = showOrderStatus;
+    showOrderStatus = function(order) {
+      saveOrderToLocal({
+        id: order.id,
+        status: order.status || 'pending',
+        branch_name: order.branch_name || selectedBranch?.name || '',
+        standby_reference: order.standby_reference || '',
+        reject_reason: order.reject_reason || '',
+        updated_at: new Date().toISOString(),
+      });
+      _origShowOrderStatus(order);
+    };
+
+    // Load tracked orders on init and poll
+    const _origInit = init;
+    init = function() {
+      _origInit();
+      loadTrackedOrders();
+      updateNotifBadge();
+      // Request notification permission
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+      // Poll every 30 seconds to avoid rate limiting. Also stop when page is hidden.
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) clearInterval(window._pollTimer);
+        else window._pollTimer = setInterval(pollTrackedOrders, 30000);
+      });
+      window._pollTimer = setInterval(pollTrackedOrders, 30000);
+    };
+    init();
+  </script>
+</body>
+</html>

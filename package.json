@@ -1,0 +1,15 @@
+{
+  "name": "genesis-order-relay",
+  "version": "1.0.0",
+  "description": "Genesis Order Relay — standalone PWA for customers to find stores and place orders",
+  "author": "Genesis Zimbabwe",
+  "private": true,
+  "scripts": {
+    "start": "npx serve public -l 3002",
+    "dev": "npx serve public -l 3002",
+    "build": "echo 'Static PWA — no build step. Deploy the public/ folder.'"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}
