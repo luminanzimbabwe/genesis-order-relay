@@ -10,6 +10,7 @@
   <link rel="manifest" href="/manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#667eea">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -135,6 +136,9 @@
   </style>
 </head>
 <body>
+  <!-- PWA install FAB (always visible) -->
+  <div id="pwaFab" onclick="installApp()" style="position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;font-size:26px;cursor:pointer;z-index:99999;box-shadow:0 6px 20px rgba(102,126,234,0.5);display:none;align-items:center;justify-content:center;user-select:none;" title="Install App">📲</div>
+  <script>if (!window.matchMedia('(display-mode: standalone)').matches) document.getElementById('pwaFab').style.display = 'flex';</script>
   <div class="or-header">
     <h1>📦 Order Relay</h1>
     <p>Find stores near you, browse products, and place your order — we'll have it ready when you arrive</p>
@@ -270,54 +274,33 @@
       navigator.serviceWorker.register('/sw.js');
     }
 
-    // PWA Install prompt
+    // PWA Install — always-visible FAB
     let deferredPrompt = null;
-    let installResolved = false;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installResolved = false;
-      showInstallBanner();
-    });
+
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; });
     window.addEventListener('appinstalled', () => {
-      installResolved = true;
-      const banner = document.getElementById('pwaInstallBanner');
-      if (banner) { banner.innerHTML = '<div style="text-align:center;padding:8px;font-weight:700;">✅ Installed! Open from your home screen.</div>'; setTimeout(() => banner.remove(), 4000); }
+      const f = document.getElementById('pwaFab');
+      if (f) f.style.display = 'none';
+      const m = document.createElement('div');
+      m.style.cssText = 'position:fixed;bottom:20px;left:16px;right:16px;text-align:center;padding:14px;font-weight:700;background:#43e97b;color:#1a1a2e;border-radius:12px;z-index:99999;max-width:400px;margin:0 auto;';
+      m.textContent = '✅ Installed! Open from your home screen.';
+      document.body.appendChild(m);
+      setTimeout(() => m.remove(), 5000);
     });
 
-    function showInstallBanner() {
-      let banner = document.getElementById('pwaInstallBanner');
-      if (banner) return;
-      banner = document.createElement('div');
-      banner.id = 'pwaInstallBanner';
-      banner.style.cssText = 'position:fixed;bottom:90px;right:90px;left:16px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:14px;padding:14px 18px;z-index:99;box-shadow:0 8px 30px rgba(102,126,234,0.4);display:flex;align-items:center;gap:12px;cursor:pointer;';
-      banner.innerHTML = `
-        <div style="font-size:28px;">📲</div>
-        <div style="flex:1;">
-          <div style="font-weight:800;font-size:14px;">Install Order Relay</div>
-          <div style="font-size:12px;opacity:0.85;">Get faster access — add to your home screen</div>
-        </div>
-        <button onclick="dismissInstallBanner()" style="background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:28px;height:28px;color:#fff;font-size:14px;cursor:pointer;">✕</button>
-      `;
-      banner.onclick = async () => {
-        if (!deferredPrompt) { showManualInstall(); return; }
-        try {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          deferredPrompt = null;
+    function installApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(({ outcome }) => {
           if (outcome === 'accepted') {
-            banner.innerHTML = '<div style="text-align:center;padding:8px;font-weight:700;">✅ Installing... Check your home screen.</div>';
-            setTimeout(() => banner.remove(), 5000);
-          } else {
-            banner.innerHTML = '<div style="text-align:center;padding:8px;font-weight:700;">❌ Install cancelled. Tap here for manual instructions.</div>';
-            banner.onclick = showManualInstall;
+            const f = document.getElementById('pwaFab');
+            if (f) f.style.display = 'none';
           }
-        } catch (e) {
-          banner.innerHTML = '<div style="text-align:center;padding:8px;font-weight:700;">⚠️ Install not supported on this browser. Tap for manual steps.</div>';
-          banner.onclick = showManualInstall;
-        }
-      };
-      document.body.appendChild(banner);
+        });
+        deferredPrompt = null;
+      } else {
+        showManualInstall();
+      }
     }
 
     function showManualInstall() {
@@ -325,33 +308,27 @@
       if (existing) { existing.remove(); return; }
       const box = document.createElement('div');
       box.id = 'pwaManualBox';
-      box.style.cssText = 'position:fixed;bottom:90px;right:90px;left:16px;background:#1e293b;color:#fff;border-radius:14px;padding:18px;z-index:100;box-shadow:0 8px 30px rgba(0,0,0,0.4);max-height:60vh;overflow-y:auto;';
+      box.style.cssText = 'position:fixed;bottom:80px;right:24px;background:#1e293b;color:#fff;border-radius:16px;padding:20px;z-index:99999;box-shadow:0 10px 40px rgba(0,0,0,0.5);max-width:320px;';
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       box.innerHTML = isIOS ? `
-        <div style="font-weight:800;font-size:15px;margin-bottom:10px;">📲 Manual Install (iOS)</div>
-        <div style="font-size:13px;color:#cbd5e1;line-height:1.6;">
-          1. Tap the <b>Share</b> button <span style="font-size:20px;">📤</span><br>
+        <div style="font-weight:800;font-size:15px;margin-bottom:12px;">📲 Install on iPhone/iPad</div>
+        <div style="font-size:13px;color:#cbd5e1;line-height:1.8;">
+          1. Tap Share <span style="font-size:20px;">📤</span><br>
           2. Scroll down<br>
           3. Tap <b>"Add to Home Screen"</b><br>
-          4. Tap <b>"Add"</b> (top right)<br><br>
-          The Order Relay icon will appear on your home screen!
+          4. Tap <b>"Add"</b>
         </div>
+        <button onclick="this.parentElement.remove()" style="margin-top:14px;padding:10px;background:#667eea;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;width:100%;">Got it ✕</button>
       ` : `
-        <div style="font-weight:800;font-size:15px;margin-bottom:10px;">📲 Manual Install (Android/Chrome)</div>
-        <div style="font-size:13px;color:#cbd5e1;line-height:1.6;">
-          1. Tap the Chrome menu <span style="font-size:18px;">⋮</span> (3 dots)<br>
+        <div style="font-weight:800;font-size:15px;margin-bottom:12px;">📲 Install on Android</div>
+        <div style="font-size:13px;color:#cbd5e1;line-height:1.8;">
+          1. Tap Chrome menu <span style="font-size:18px;">⋮</span><br>
           2. Tap <b>"Add to Home Screen"</b><br>
-          3. Tap <b>"Add"</b><br><br>
-          Or use your browser's <b>Install</b> option in the address bar.
+          3. Tap <b>"Add"</b>
         </div>
+        <button onclick="this.parentElement.remove()" style="margin-top:14px;padding:10px;background:#667eea;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;width:100%;">Got it ✕</button>
       `;
-      box.innerHTML += '<button onclick="this.parentElement.remove()" style="margin-top:12px;padding:10px 20px;background:#667eea;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;width:100%;">Got it ✕</button>';
       document.body.appendChild(box);
-    }
-
-    function dismissInstallBanner() {
-      const banner = document.getElementById('pwaInstallBanner');
-      if (banner) banner.remove();
     }
 
     // Play notification sound using AudioContext
