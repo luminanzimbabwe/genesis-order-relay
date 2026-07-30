@@ -266,7 +266,10 @@
   </div>
 
   <script>
-    const API = 'https://genesisbackend-cu69.onrender.com/api/inventory';
+    // ─── LOCAL DEV (active) ────────────────────────────────────────────────
+    const API = '/api/inventory';
+    // ─── RENDER PRODUCTION (comment in to switch back) ────────────────────
+    // const API = 'https://www.genesiszimbabwe.com/api/inventory';
     let companies = [];
 
     // Register Service Worker for push notifications

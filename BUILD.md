@@ -18,7 +18,7 @@ Upload the contents of `public/` to the root of your site:
 ### Requirements for install + notifications
 - **HTTPS is required** (browsers only allow PWA install + push over HTTPS)
 - `manifest.json` + `sw.js` are already present → users can "Install" / "Add to Home Screen"
-- Connects to the shared backend API at `https://genesisbackend-cu69.onrender.com/api/inventory`
+- Connects to the shared backend API at `https://www.genesiszimbabwe.com/api`
 
 ## Project layout
 - `public/index.html` — the Order Relay app (self-contained: styles, scripts, API config)
