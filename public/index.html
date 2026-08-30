@@ -266,10 +266,10 @@
   </div>
 
   <script>
-    // ─── LOCAL DEV (active) ────────────────────────────────────────────────
-    const API = '/api/inventory';
-    // ─── RENDER PRODUCTION (comment in to switch back) ────────────────────
-    // const API = 'https://www.genesiszimbabwe.com/api/inventory';
+    // ─── ONLINE (Production — Cloudflare) ───────────────────────────────────
+    const API = 'https://www.genesiszimbabwe.com/api/inventory';
+    // ─── OFFLINE / SELF-HOSTED (comment in for local dev) ────────────────────
+    // const API = 'http://localhost:8000/api/inventory';
     let companies = [];
 
     // Register Service Worker for push notifications
