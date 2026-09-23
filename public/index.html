@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Order Relay — Find Stores & Place Orders | Genesis Zimbabwe</title>
   <meta name="robots" content="noindex, nofollow">
-  <link rel="icon" type="image/png" href="/genesislogo.png?v=3cf997bd">
-  <link rel="apple-touch-icon" href="/genesislogo.png?v=3cf997bd">
+  <link rel="icon" type="image/png" href="/genesislogo.png?v=b3e7935a">
+  <link rel="apple-touch-icon" href="/genesislogo.png?v=b3e7935a">
   <link rel="manifest" href="/manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1011,21 +1011,21 @@
               if (updated.status === 'accepted') {
                 new Notification('✅ Order Accepted!', {
                   body: `Order #${o.id} at ${o.branch_name || 'store'} is ready.${o.standby_reference ? ' Ref: ' + o.standby_reference : ''} Time to head to the store!`,
-                  icon: '/genesislogo.png?v=3cf997bd',
+                  icon: '/genesislogo.png?v=b3e7935a',
                   tag: `order-${o.id}-accepted`,
                   requireInteraction: true,
                 });
               } else if (updated.status === 'rejected') {
                 new Notification('❌ Order Rejected', {
                   body: `Order #${o.id} at ${o.branch_name || 'store'} was rejected.${o.reject_reason ? ' Reason: ' + o.reject_reason : ''}`,
-                  icon: '/genesislogo.png?v=3cf997bd',
+                  icon: '/genesislogo.png?v=b3e7935a',
                   tag: `order-${o.id}-rejected`,
                   requireInteraction: true,
                 });
               } else if (updated.status === 'fulfilled') {
                 new Notification('🎉 Ready for Pickup!', {
                   body: `Order #${o.id} at ${o.branch_name || 'store'} is ready for pickup!`,
-                  icon: '/genesislogo.png?v=3cf997bd',
+                  icon: '/genesislogo.png?v=b3e7935a',
                   tag: `order-${o.id}-fulfilled`,
                   requireInteraction: true,
                 });
