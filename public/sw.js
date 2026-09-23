@@ -1,4 +1,4 @@
-const CACHE = 'genesis-order-relay-v2';
+const CACHE = 'genesis-order-relay-v3';
 const SHELL = [
   '/',
   '/index.html',
