@@ -266,11 +266,51 @@
   </div>
 
   <script>
-    // ─── ONLINE (Production — Cloudflare) ───────────────────────────────────
-    const API = 'https://www.genesiszimbabwe.com/api/inventory';
-    // ─── OFFLINE / SELF-HOSTED (comment in for local dev) ────────────────────
-    // const API = 'http://localhost:8000/api/inventory';
+    // ─── API BASE ─────────────────────────────────────────────────────────────
+    // This used to be a hardcoded constant pinned to the public Cloudflare
+    // domain, so every data call had to leave the local network even when the
+    // app is being served by a Genesis backend on the LAN.
+    //
+    // Resolution order:
+    //   1. ?api=<url>   explicit override, e.g.
+    //                  ?api=http://192.168.0.101:8000/api/inventory
+    //   2. same origin  when Django itself served this page (port 80/443/:8000)
+    //   3. production   otherwise, e.g. this standalone :3003 PWA
+    const API_OVERRIDE = new URLSearchParams(location.search).get('api');
+    const PORT = location.port;
+    const SERVED_BY_BACKEND = PORT === '' || PORT === '80' || PORT === '443' || PORT === '8000';
+    const API = API_OVERRIDE
+      || (SERVED_BY_BACKEND ? `${location.origin}/api/inventory` : 'https://www.genesiszimbabwe.com/api/inventory');
     let companies = [];
+
+    // --- API HELPER ---
+    // fetch() only rejects on NETWORK failures. An HTTP 500/502 or an HTML
+    // error page resolves perfectly normally, so a bare
+    // `await (await fetch(...)).json()` hands the error body back as if it were
+    // data, and the caller blows up later inside a renderer. That turned every
+    // server-side problem into the same useless "Failed to load stores."
+    async function fetchJSON(url, options) {
+      let res;
+      try {
+        res = await fetch(url, options);
+      } catch (e) {
+        throw new Error(`Network error - could not reach ${API} (${e.message})`);
+      }
+      let body = null;
+      try { body = await res.json(); } catch (e) { /* non-JSON error page */ }
+      if (!res.ok) {
+        const msg = (body && (body.detail || body.error || body.message))
+          || `HTTP ${res.status}${res.statusText ? ' ' + res.statusText : ''}`;
+        throw new Error(msg);
+      }
+      return body;
+    }
+
+    // Escape anything coming back from the server before putting it in innerHTML.
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
 
     // Register Service Worker for push notifications
     if ('serviceWorker' in navigator) {
@@ -395,11 +435,12 @@
       getLocation();
       document.getElementById('resultsArea').innerHTML = '<div class="or-loading"><div class="spinner"></div><div>Loading stores...</div></div>';
       try {
-        companies = await (await fetch(`${API}/public/order-relay/companies/`)).json();
+        companies = await fetchJSON(`${API}/public/order-relay/companies/`);
+        if (!Array.isArray(companies)) throw new Error('Server did not return a list of stores');
         renderStats();
         renderCompanies(companies);
       } catch (e) {
-        document.getElementById('resultsArea').innerHTML = '<div class="or-error">Failed to load stores. <button class="or-retry-btn" onclick="init()">Retry</button></div>';
+        document.getElementById('resultsArea').innerHTML = `<div class="or-error">Failed to load stores.<div style="margin-top:6px;font-size:12px;opacity:.8;font-weight:500;word-break:break-word;">${esc(e.message)}</div> <button class="or-retry-btn" onclick="init()">Retry</button></div>`;
       }
     }
 
@@ -538,16 +579,18 @@
       if (productLoadingMore) return;
       productLoadingMore = true;
       try {
-        const r = await fetch(`${API}/public/order-relay/products/${selectedBranch.id}/?page=${page}&page_size=50`);
-        const data = await r.json();
-        const newProducts = data.results || [];
+        const data = await fetchJSON(`${API}/public/order-relay/products/${selectedBranch.id}/?page=${page}&page_size=50`);
+        if (!data || !Array.isArray(data.results)) throw new Error('Server did not return a product list');
+        const newProducts = data.results;
         selectedBranchProducts = selectedBranchProducts.concat(newProducts);
         productPage = data.page || page;
         productTotalPages = data.total_pages || 1;
         productTotalCount = data.count || 0;
         renderProducts();
       } catch (e) {
-        document.getElementById('resultsArea').innerHTML += '<div class="or-error">Failed to load more products.</div>';
+        const box = document.getElementById('resultsArea');
+        box.innerHTML = box.innerHTML.replace(/<div class="or-error">[\s\S]*$/, '')
+          + `<div class="or-error">Failed to load products.<div style="margin-top:6px;font-size:12px;opacity:.8;font-weight:500;word-break:break-word;">${esc(e.message)}</div></div>`;
       } finally {
         productLoadingMore = false;
       }

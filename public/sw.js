@@ -1,4 +1,4 @@
-const CACHE = 'genesis-order-relay-v3';
+const CACHE = 'genesis-order-relay-v4';
 const SHELL = [
   '/',
   '/index.html',
@@ -28,10 +28,25 @@ self.addEventListener('fetch', (e) => {
   if (url.pathname.startsWith('/api/')) {
     e.respondWith(
       fetch(request).then((res) => {
-        const clone = res.clone();
-        caches.open(CACHE).then((c) => c.put(request, clone));
+        // ONLY cache real successes. Caching unconditionally meant a single
+        // 500 (or an HTML error page) got written to the cache and then
+        // replayed by the fallback below on every later failure - so one bad
+        // response could keep the app broken long after the server was fixed.
+        if (res && res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE).then((c) => c.put(request, clone));
+        }
         return res;
-      }).catch(() => caches.match(request))
+      }).catch(() => caches.match(request).then((cached) => {
+        if (cached) return cached;
+        // respondWith(undefined) leaves the page's fetch() hanging/rejecting
+        // with a bare TypeError. Answer with real JSON so the caller can tell
+        // "offline" apart from "server error".
+        return new Response(
+          JSON.stringify({ error: 'Offline - no network connection to the server' }),
+          { status: 503, headers: { 'Content-Type': 'application/json' } }
+        );
+      }))
     );
     return;
   }
