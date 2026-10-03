@@ -89,13 +89,21 @@
     }
   });
 
-  // Fallback: if event never fires within 3s, show generic instructions
+  // Fallback: if event never fires within 3s, show browser-specific instructions
   setTimeout(function () {
     if (!deferredPrompt && !banner) {
-      createBanner(
-        'Open this page in <b>Chrome</b>, then tap the browser menu <b>(⋮)</b> → <b>Install app</b>.',
-        false
-      );
+      var ua = navigator.userAgent.toLowerCase();
+      var hint = 'Open this page in <b>Chrome</b>, then tap the browser menu <b>(⋮)</b> → <b>Install app</b>.';
+      if (/firefox/.test(ua)) {
+        hint = 'Tap the browser menu <b>(⋮)</b> at the top right, then tap <b>Install</b>.';
+      } else if (/samsungbrowser/.test(ua)) {
+        hint = 'Tap the browser menu <b>(⋮)</b>, then tap <b>Add page to → Home screen</b>.';
+      } else if (/edg/.test(ua)) {
+        hint = 'Tap the browser menu <b>(⋯)</b>, then tap <b>Add to phone</b>.';
+      } else if (/opr\//.test(ua) || /opera/.test(ua)) {
+        hint = 'Tap the <b>Opera menu</b>, then tap <b>Add to Home screen</b>.';
+      }
+      createBanner(hint, false);
     }
   }, 3000);
 })();
